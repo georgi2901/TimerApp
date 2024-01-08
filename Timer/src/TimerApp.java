@@ -5,12 +5,15 @@ import java.awt.event.ActionListener;
 
 public class TimerApp extends JFrame {
     private JLabel timerLabel;
-    private JTextField timeTextField;
+    private JLabel minutesLabel;
+    private JLabel secondsLabel;
+    private JTextField minutesTextField;
+    private JTextField secondsTextField;
     private Timer timer;
-    private int secondsRemaining;
+    private int totalSeconds;
 
     public TimerApp() {
-        setTitle("Timer");
+        setTitle("Programmable Timer App");
         setSize(300, 200);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -26,16 +29,34 @@ public class TimerApp extends JFrame {
         timerLabel.setHorizontalAlignment(SwingConstants.CENTER);
         container.add(timerLabel, BorderLayout.CENTER);
 
-        timeTextField = new JTextField();
-        timeTextField.setHorizontalAlignment(SwingConstants.CENTER);
-        timeTextField.setToolTipText("Enter time in seconds");
-        container.add(timeTextField, BorderLayout.NORTH);
+        JPanel timePanel = new JPanel();
+        timePanel.setLayout(new GridLayout(1, 2));
+        
+        minutesLabel = new JLabel("Minutes: ");
+        timePanel.add(minutesLabel);
+
+        minutesTextField = new JTextField();
+        minutesTextField.setHorizontalAlignment(SwingConstants.CENTER);
+        minutesTextField.setToolTipText("Minutes");
+        timePanel.add(minutesTextField);
+        
+        secondsLabel = new JLabel("Seconds: ");
+        timePanel.add(secondsLabel);
+
+        secondsTextField = new JTextField();
+        secondsTextField.setHorizontalAlignment(SwingConstants.CENTER);
+        secondsTextField.setToolTipText("Seconds");
+        timePanel.add(secondsTextField);
+
+        container.add(timePanel, BorderLayout.NORTH);
 
         JButton startButton = new JButton("Start");
         startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 startTimer();
+            	minutesTextField.setText("");
+            	secondsTextField.setText("");
             }
         });
 
@@ -55,7 +76,14 @@ public class TimerApp extends JFrame {
 
     private void startTimer() {
         try {
-            secondsRemaining = Integer.parseInt(timeTextField.getText());
+            int minutes = Integer.parseInt(minutesTextField.getText());
+            int seconds = Integer.parseInt(secondsTextField.getText());
+
+            
+            totalSeconds = minutes * 60 + seconds;
+
+            updateTimerLabel();
+
             timer = new Timer(1000, new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -64,7 +92,7 @@ public class TimerApp extends JFrame {
             });
             timer.start();
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Invalid time format. Please enter a valid number.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Invalid time format. Please enter valid numbers.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -76,18 +104,20 @@ public class TimerApp extends JFrame {
     }
 
     private void updateTimer() {
-        if (secondsRemaining > 0) {
-            int minutes = secondsRemaining / 60;
-            int seconds = secondsRemaining % 60;
-
-            String time = String.format("%02d:%02d", minutes, seconds);
-            timerLabel.setText(time);
-
-            secondsRemaining--;
+        if (totalSeconds > 0) {
+            totalSeconds--;
+            updateTimerLabel();
         } else {
             stopTimer();
-            JOptionPane.showMessageDialog(this, "Timer Expired!", "Alert", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Timer Expired!", "Timer Alert", JOptionPane.INFORMATION_MESSAGE);
         }
+    }
+
+    private void updateTimerLabel() {
+        int minutes = totalSeconds / 60;
+        int seconds = totalSeconds % 60;
+        String time = String.format("%02d:%02d", minutes, seconds);
+        timerLabel.setText(time);
     }
 
     public static void main(String[] args) {
